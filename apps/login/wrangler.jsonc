@@ -8,7 +8,10 @@
 	// Every page makes several sequential calls to Zitadel in us-central1;
 	// smart placement runs the Worker next to it instead of next to the user.
 	"placement": { "mode": "smart" },
-	"workers_dev": true,
+	// Only the login path is served by this Worker; the rest of auth.maetry.com
+	// (console, OIDC endpoints, APIs) keeps going to Zitadel on Cloud Run.
+	"routes": [{ "pattern": "auth.maetry.com/ui/v2/login*", "zone_name": "maetry.com" }],
+	"workers_dev": false,
 	"preview_urls": false,
 	"observability": {
 		"enabled": true,
