@@ -1,0 +1,26 @@
+// MAETRY: Cloudflare Workers deployment of the Login V2 UI (see MAETRY.md).
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "zitadel-login",
+	"main": ".open-next/worker.js",
+	"compatibility_date": "2026-08-01",
+	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+	// Every page makes several sequential calls to Zitadel in us-central1;
+	// smart placement runs the Worker next to it instead of next to the user.
+	"placement": { "mode": "smart" },
+	"workers_dev": true,
+	"preview_urls": false,
+	"observability": {
+		"enabled": true,
+		"logs": { "enabled": true, "invocation_logs": false }
+	},
+	"assets": {
+		"directory": ".open-next/assets",
+		"binding": "ASSETS"
+	},
+	"vars": {
+		"ZITADEL_API_URL": "https://auth.maetry.com",
+		"OTEL_SDK_DISABLED": "true"
+	}
+	// ZITADEL_SERVICE_USER_TOKEN is a secret: `wrangler secret put ZITADEL_SERVICE_USER_TOKEN`.
+}

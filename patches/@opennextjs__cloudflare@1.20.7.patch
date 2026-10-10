@@ -1,0 +1,15 @@
+diff --git a/dist/cli/build/open-next/bundle-node-middleware.js b/dist/cli/build/open-next/bundle-node-middleware.js
+index 6cc1cb15b8b5cf8aaa8ef2c922bff499b35f9704..1e21dbec9e85531475cdb18b8bdf7dec09125a86 100644
+--- a/dist/cli/build/open-next/bundle-node-middleware.js
++++ b/dist/cli/build/open-next/bundle-node-middleware.js
+@@ -191,7 +191,9 @@ export async function bundleNodeMiddleware(options) {
+         },
+         alias: {
+             // See `hasOpentelemetry` above.
+-            ...(hasOpentelemetry ? {} : { "@opentelemetry/api": "next/dist/compiled/@opentelemetry/api" }),
++            // MAETRY: under pnpm only the CJS build of @opentelemetry/api is traced, so the
++            // installed package cannot be bundled with the "module" condition; always alias.
++            "@opentelemetry/api": "next/dist/compiled/@opentelemetry/api",
+         },
+         plugins: [
+             openNextResolvePlugin({

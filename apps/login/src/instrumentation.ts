@@ -32,7 +32,9 @@ export async function register(): Promise<void> {
   // Only run in the Node.js environment
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
 
-  if (isOtelEnabled()) {
+  // MAETRY: the OTEL NodeSDK cannot run on Cloudflare Workers; the build-time flag lets
+  // the bundler drop instrumentation.node from the Worker bundle entirely.
+  if (process.env.NEXT_PUBLIC_MAETRY_CLOUDFLARE !== "true" && isOtelEnabled()) {
     const { registerNode } = await import("./instrumentation.node");
     _loggerProvider = await registerNode();
   }

@@ -6,14 +6,17 @@ packages:
   - deploy/compose
 
 exclude:
-  - benchmark # because of the node 18 or 20 dependency
+  - benchmark
 
 overrides:
-  "axios@<1.18.0": "^1.18.0"
-  "brace-expansion@>=4.0.0 <5.0.9": "^5.0.9"
-  "esbuild@>=0.27.3 <0.28.1": "^0.28.1"
-  "postcss@<8.5.23": "^8.5.23"
-  "sharp@<0.35.0": "^0.35.0"
-  "uuid@<11.1.1": "^11.1.1"
-  "@opentelemetry/core@<2.8.0": "^2.8.0"
-  "@opentelemetry/propagator-jaeger@<2.9.0": "^2.9.0"
+  '@opentelemetry/core@<2.8.0': ^2.8.0
+  '@opentelemetry/propagator-jaeger@<2.9.0': ^2.9.0
+  axios@<1.18.0: ^1.18.0
+  brace-expansion@>=4.0.0 <5.0.9: ^5.0.9
+  esbuild@>=0.27.3 <0.28.1: ^0.28.1
+  postcss@<8.5.23: ^8.5.23
+  sharp@<0.35.0: ^0.35.0
+  uuid@<11.1.1: ^11.1.1
+
+patchedDependencies:
+  '@opennextjs/cloudflare@1.20.7': patches/@opennextjs__cloudflare@1.20.7.patch

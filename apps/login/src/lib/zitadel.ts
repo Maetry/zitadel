@@ -1,4 +1,5 @@
-import { createConnectTransport } from "@connectrpc/connect-node";
+// MAETRY: fetch-based transport so the login runs on Cloudflare Workers as well as Node.
+import { createConnectTransport } from "@connectrpc/connect-web";
 import { Client, create, Duration } from "@zitadel/client";
 import { makeReqCtx } from "@zitadel/client/v2";
 import { IdentityProviderService } from "@zitadel/proto/zitadel/idp/v2/idp_service_pb";
@@ -1428,7 +1429,9 @@ export function createServerTransport(token: string, serviceConfig: ServiceConfi
   };
 
   return createConnectTransport({
-    httpVersion: "1.1",
+    useBinaryFormat: true,
+    // MAETRY: connect-web sends redirect: "error", which Workers reject; RPCs never redirect.
+    fetch: (input, init) => fetch(input, { ...init, redirect: "manual" }),
     baseUrl: serviceConfig.baseUrl,
     interceptors: [otelGrpcInterceptor, errorClassificationInterceptor, authorizationInterceptor, headerInterceptor],
   });
