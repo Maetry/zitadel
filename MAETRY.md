@@ -36,6 +36,9 @@ Every change is marked with a `MAETRY:` comment in the source.
 | `apps/login/next.config.mjs` | empty `serverExternalPackages` when `NEXT_PUBLIC_MAETRY_CLOUDFLARE=true` | OpenNext cannot resolve server externals from the pnpm layout |
 | `apps/login/open-next.config.ts`, `wrangler.jsonc` | new | Workers build and deployment config |
 | `patches/@opennextjs__cloudflare@1.20.7.patch` | always alias `@opentelemetry/api` to Next's compiled copy in the Node middleware bundle | under pnpm only the CJS build is traced; OpenNext skips its alias when the package is installed |
+| `apps/login/.env.production` | new: `NEXT_PUBLIC_THEME_*` (roundness, layout, spacing, appearance, background) | Maetry theme; `next build` reads it, so a change needs a rebuild and redeploy. Colors, logo and font come from Branding in the Zitadel console, not from here |
+| `apps/login/src/components/system-theme.tsx`, `src/app/(login)/layout.tsx` | new `SystemTheme` instead of `ThemeSwitch`; `LanguageSwitcher` (and the allowed-languages lookup it needed) removed | no light/dark or language switch: the login follows the system light/dark setting (a stored choice is reset, a mode forced in Branding still wins); the apps pass the language as `ui_locales` |
+| `apps/login/wrangler.jsonc` | `ZITADEL_UI_LOCALES_OVERRIDE_COOKIE=true` | the apps pass the language as `ui_locales`, which wins over a language picked earlier |
 
 ## Building for Cloudflare Workers
 

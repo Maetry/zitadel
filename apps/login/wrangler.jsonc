@@ -23,7 +23,9 @@
 	},
 	"vars": {
 		"ZITADEL_API_URL": "https://auth.maetry.com",
-		"OTEL_SDK_DISABLED": "true"
+		"OTEL_SDK_DISABLED": "true",
+		// The apps pass the language as ui_locales; it wins over a language picked earlier.
+		"ZITADEL_UI_LOCALES_OVERRIDE_COOKIE": "true"
 	}
 	// ZITADEL_SERVICE_USER_TOKEN is a secret: `wrangler secret put ZITADEL_SERVICE_USER_TOKEN`.
 }
