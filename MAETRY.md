@@ -1,7 +1,8 @@
 # Maetry fork of ZITADEL
 
-Only `apps/login` (Login V2) is customized and deployed from this fork. The ZITADEL
-backend runs the official image; the login built here must match its version.
+Only `apps/login` (Login V2) is customized and deployed from this fork, plus our own
+`maetry/notifier` Worker. The ZITADEL backend runs the official image; the login built
+here must match its version.
 
 ## Branches and versions
 
@@ -50,3 +51,71 @@ NEXT_PUBLIC_BASE_PATH=/ui/v2/login NEXT_PUBLIC_MAETRY_CLOUDFLARE=true npx openne
 
 Runtime configuration lives in `wrangler.jsonc`; the login client PAT is the Worker
 secret `ZITADEL_SERVICE_USER_TOKEN`. The bundle is ~4.7 MB gzip, so it needs Workers Paid.
+
+## Email and SMS: `maetry/notifier`
+
+ZITADEL has no Telnyx provider, so its HTTP email and SMS providers post to the
+`zitadel-notifier` Worker, which sends through the Telnyx API. Upstream code is not
+touched. The Worker lives outside the pnpm workspace (own npm lockfile) so upstream
+merges never conflict on it.
+
+```
+ZITADEL ── POST https://notify.maetry.com/zitadel/email ──┐  ZITADEL-Signature
+        └─ POST https://notify.maetry.com/zitadel/sms ────┤  (HMAC-SHA256, 5 min)
+                                                          ▼
+              zitadel-notifier ── /v2/email_messages, /v2/messages ──▶ Telnyx
+```
+
+- **Texts** come from ZITADEL (Console → Default settings → Message Texts), already
+  translated to the user's language. The Worker only lays out the email (HTML from
+  `templateData`, colors and logo from Branding, everything escaped) and sends
+  `templateData.text` as the SMS.
+- **Retries**: a non-2xx answer makes ZITADEL retry. In its default notification mode
+  (`Notifications.LegacyEnabled: true`) a failing event also holds back all later
+  notifications until the projection gives up on it, so only transient failures
+  (timeout, Telnyx 429/5xx) answer `503`. A Telnyx rejection (invalid number, suppressed
+  address, sending policy) is logged as `telnyx_rejected` and answered `200`: a retry
+  would be rejected again. Emails carry an `Idempotency-Key` derived from the body, so a
+  retry of an accepted email is not delivered twice; SMS has no idempotency, a ZITADEL
+  timeout after Telnyx accepted it can duplicate it.
+- **Logs** carry the event type, provider id, Telnyx id and a masked recipient, never
+  the text or the code.
+- **Telnyx**: sender `no-reply@mail.maetry.com` (domain `mail.maetry.com`, DKIM
+  `telnyx1`, SPF, DMARC), SMS from the verified toll-free `+1 877 262 3879`
+  (Maetry SMS Profile). Open/click tracking and one-click unsubscribe stay off: links
+  carry codes, and an unsubscribe would suppress password resets and OTPs.
+
+Configuration is in `maetry/notifier/wrangler.jsonc` (`EMAIL_FROM`, `EMAIL_FROM_NAME`,
+`EMAIL_REPLY_TO`, `SMS_FROM`). Secrets:
+
+| Secret | Value |
+|---|---|
+| `TELNYX_API_KEY` | Telnyx API v2 key |
+| `ZITADEL_EMAIL_SIGNING_KEYS` | `signing_key` of the ZITADEL HTTP email provider |
+| `ZITADEL_SMS_SIGNING_KEYS` | `signing_key` of the ZITADEL HTTP SMS provider |
+
+Without a signing key every request is rejected with `401`. During a key rotation put
+both keys, comma-separated (`new,old`), and drop the old one once ZITADEL uses the new.
+
+```bash
+cd maetry/notifier
+npm ci
+npm run check && npm test
+npx wrangler deploy
+npx wrangler secret put TELNYX_API_KEY   # and both signing keys
+```
+
+Setting up ZITADEL (Default settings). ZITADEL has no test call for HTTP providers,
+so the provider is checked live right after activation:
+
+1. Deploy the Worker and set `TELNYX_API_KEY`.
+2. Add an HTTP email provider (SMTP Provider → HTTP) with endpoint
+   `https://notify.maetry.com/zitadel/email` and an HTTP SMS provider with
+   `https://notify.maetry.com/zitadel/sms`. Each returns its signing key once; put it
+   into `ZITADEL_EMAIL_SIGNING_KEYS` / `ZITADEL_SMS_SIGNING_KEYS`.
+3. Activate both and immediately trigger an email verification and a phone code on a
+   test user. Check `npx wrangler tail zitadel-notifier` and the Telnyx logs.
+4. Rollback: deactivate the provider in ZITADEL.
+
+The toll-free sender reaches only US and Canada numbers; other countries need an
+alphanumeric sender or a number pool (`messaging_profile_id` instead of `from`).

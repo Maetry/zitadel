@@ -1,0 +1,27 @@
+// MAETRY: delivers ZITADEL email and SMS through Telnyx (see MAETRY.md).
+// ZITADEL's HTTP email and SMS providers post here; this Worker is their only consumer.
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "zitadel-notifier",
+	"account_id": "2b50cda4d7affea12c559b8ca77ddbec",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-10-12",
+	// Called by ZITADEL on Cloud Run, not by users.
+	"routes": [{ "pattern": "notify.maetry.com", "custom_domain": true }],
+	"workers_dev": false,
+	"preview_urls": false,
+	"observability": {
+		"enabled": true,
+		"logs": { "enabled": true, "invocation_logs": false }
+	},
+	"vars": {
+		"EMAIL_FROM": "no-reply@mail.maetry.com",
+		"EMAIL_FROM_NAME": "Maetry",
+		"EMAIL_REPLY_TO": "",
+		"SMS_FROM": "+18772623879"
+	}
+	// Secrets (`wrangler secret put <NAME>`):
+	// TELNYX_API_KEY — Telnyx API v2 key.
+	// ZITADEL_EMAIL_SIGNING_KEYS, ZITADEL_SMS_SIGNING_KEYS — signing_key of the
+	// ZITADEL HTTP provider; comma-separated while rotating (new,old).
+}
