@@ -13,6 +13,9 @@ import { getTranslations } from "next-intl/server";
 import { Lato } from "next/font/google";
 import React, { Suspense } from "react";
 
+// MAETRY: white in light mode, pure black in dark mode.
+const loginBackground = "bg-white dark:bg-black relative flex min-h-screen flex-col justify-center";
+
 const lato = Lato({
   weight: ["400", "700", "900"],
   subsets: ["latin"],
@@ -32,9 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Tooltip.Provider>
             <Suspense
               fallback={
-                <BackgroundWrapper
-                  className={`bg-background-light-600 dark:bg-background-dark-600 relative flex min-h-screen flex-col justify-center`}
-                >
+                <BackgroundWrapper className={loginBackground}>
                   <div className="relative mx-auto w-full max-w-[440px] py-8">
                     <Skeleton>
                       <div className="h-40"></div>
@@ -45,9 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               }
             >
               <LanguageProvider>
-                <BackgroundWrapper
-                  className={`bg-background-light-600 dark:bg-background-dark-600 relative flex min-h-screen flex-col justify-center`}
-                >
+                <BackgroundWrapper className={loginBackground}>
                   <div className="relative mx-auto w-full max-w-[1100px] py-8">
                     <div>{children}</div>
                     <SystemTheme />

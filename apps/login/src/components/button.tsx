@@ -38,7 +38,8 @@ export const getButtonClasses = (
       "box-border leading-36px text-14px inline-flex items-center focus:outline-none transition-colors transition-shadow duration-300": true,
       "disabled:border-none disabled:bg-gray-300 disabled:text-gray-600 disabled:shadow-none disabled:cursor-not-allowed disabled:dark:bg-gray-700 disabled:dark:text-gray-900":
         variant === ButtonVariants.Primary,
-      "bg-primary-light-500 dark:bg-primary-dark-500 hover:bg-primary-light-400 hover:dark:bg-primary-dark-400 text-primary-light-contrast-500 dark:text-primary-dark-contrast-500":
+      // MAETRY: primary actions stay brand blue without requiring hover.
+      "bg-[#2B60DE] dark:bg-[#2B60DE] text-white dark:text-white":
         variant === ButtonVariants.Primary && color !== ButtonColors.Warn,
       "bg-warn-light-500 dark:bg-warn-dark-500 hover:bg-warn-light-400 hover:dark:bg-warn-dark-400 text-white dark:text-white":
         variant === ButtonVariants.Primary && color === ButtonColors.Warn,
@@ -59,8 +60,12 @@ function getDefaultButtonRoundness(): string {
 }
 
 // Helper function to get default button appearance from centralized theme system
-function getDefaultButtonAppearance(): string {
+function getDefaultButtonAppearance(variant: ButtonVariants): string {
   const themeConfig = getThemeConfig();
+  // MAETRY: glass backgrounds must not replace a primary button's solid fill.
+  if (themeConfig.appearance === "glass" && variant === ButtonVariants.Primary) {
+    return "backdrop-blur-sm border border-white/30 dark:border-white/20 shadow-lg";
+  }
   const appearance = APPEARANCE_STYLES[themeConfig.appearance];
   return appearance?.button || "border border-button-light-border dark:border-button-dark-border"; // Fallback to flat design
 }
@@ -80,7 +85,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ) => {
     // Use theme-based values if not explicitly provided
     const actualRoundness = roundness || getDefaultButtonRoundness();
-    const actualAppearance = getDefaultButtonAppearance();
+    const actualAppearance = getDefaultButtonAppearance(variant);
 
     return (
       <button

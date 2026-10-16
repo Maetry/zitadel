@@ -1,4 +1,5 @@
 // MAETRY: fetch-based transport so the login runs on Cloudflare Workers as well as Node.
+import { joinName } from "@/lib/maetry-name";
 import { createConnectTransport } from "@connectrpc/connect-web";
 import { Client, create, Duration } from "@zitadel/client";
 import { makeReqCtx } from "@zitadel/client/v2";
@@ -473,7 +474,13 @@ export async function addHumanUser({ serviceConfig, email, firstName, lastName, 
       },
     },
     username: email,
-    profile: { givenName: firstName, familyName: lastName },
+    // MAETRY: registration asks for one free-form name; keep it as typed (see lib/maetry-name.ts).
+    profile: {
+      givenName: firstName,
+      familyName: lastName,
+      displayName: joinName(firstName, lastName),
+      nickName: joinName(firstName, lastName),
+    },
     passwordType: password ? { case: "password", value: { password } } : undefined,
   });
 

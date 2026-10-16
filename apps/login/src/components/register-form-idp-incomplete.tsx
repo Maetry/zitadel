@@ -1,6 +1,7 @@
 "use client";
 
 import { handleServerActionResponse } from "@/lib/client-utils";
+import { joinName, splitName } from "@/lib/maetry-name";
 import { registerUserAndLinkToIDP } from "@/lib/server/register";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -16,8 +17,7 @@ import { Translated } from "./translated";
 
 type Inputs =
   | {
-      firstname: string;
-      lastname: string;
+      name: string;
       email: string;
       username?: string;
     }
@@ -53,8 +53,8 @@ export function RegisterFormIDPIncomplete({
     mode: "onChange",
     defaultValues: {
       email: defaultValues?.email ?? "",
-      firstname: defaultValues?.firstname ?? "",
-      lastname: defaultValues?.lastname ?? "",
+      // MAETRY: one free-form name instead of first and last name (see lib/maetry-name.ts).
+      name: joinName(defaultValues?.firstname, defaultValues?.lastname),
     },
   });
 
@@ -73,8 +73,7 @@ export function RegisterFormIDPIncomplete({
         idpUserName: idpUserName ? idpUserName : values.username,
         idpUserId: idpUserId,
         email: values.email,
-        firstName: values.firstname,
-        lastName: values.lastname,
+        ...splitName(values.name),
         organization: organization,
         requestId: requestId,
         idpIntent: idpIntent,
@@ -109,30 +108,17 @@ export function RegisterFormIDPIncomplete({
               />
             </div>
           )}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="">
-              <TextInput
-                type="firstname"
-                autoComplete="firstname"
-                autoFocus={!!idpUserName}
-                required
-                {...register("firstname", { required: t("required.firstname") })}
-                label={t("labels.firstname")}
-                error={errors.firstname?.message as string}
-                data-testid="firstname-text-input"
-              />
-            </div>
-            <div className="">
-              <TextInput
-                type="lastname"
-                autoComplete="lastname"
-                required
-                {...register("lastname", { required: t("required.lastname") })}
-                label={t("labels.lastname")}
-                error={errors.lastname?.message as string}
-                data-testid="lastname-text-input"
-              />
-            </div>
+          <div className="">
+            <TextInput
+              type="text"
+              autoComplete="name"
+              autoFocus={!!idpUserName}
+              required
+              {...register("name", { required: t("required.name") })}
+              label={t("labels.name")}
+              error={errors.name?.message as string}
+              data-testid="name-text-input"
+            />
           </div>
           <div className="">
             <TextInput

@@ -22,6 +22,11 @@ function getDefaultCardPadding(): string {
 // Helper function to get default background from centralized theme system
 function getDefaultCardBackground(): string {
   const themeConfig = getThemeConfig();
+  // MAETRY: on the white / black page the glass card is an iOS grouped surface so it
+  // stands out from the background.
+  if (themeConfig.appearance === "glass") {
+    return "bg-[#f2f2f7] dark:bg-[#2c2c2e]";
+  }
   const appearance = APPEARANCE_STYLES[themeConfig.appearance];
 
   // Use appearance-specific background if defined, otherwise fallback to material design (current system)
@@ -31,6 +36,10 @@ function getDefaultCardBackground(): string {
 // Helper function to get default card styling from centralized theme system
 function getDefaultCardStyling(): string {
   const themeConfig = getThemeConfig();
+  // MAETRY: glass styling without its translucent fill, which would override the surface above.
+  if (themeConfig.appearance === "glass") {
+    return "border border-black/5 dark:border-white/10 shadow-xl";
+  }
   const appearance = APPEARANCE_STYLES[themeConfig.appearance];
   return appearance?.card || "shadow-sm border-0"; // Fallback to material design
 }

@@ -24,6 +24,10 @@ export async function proxy(request: NextRequest) {
   // Internal infrastructure routes — skip middleware entirely.
   // /healthy and /ready are Kubernetes/Docker health probes that must respond
   // without depending on a ZITADEL backend.
+  // MAETRY: local visual preview must not fetch backend security settings.
+  if (process.env.NODE_ENV === "development" && request.nextUrl.pathname === "/preview") {
+    return NextResponse.next();
+  }
   const skipPaths = ["/healthy", "/ready"];
   if (skipPaths.includes(request.nextUrl.pathname)) {
     return NextResponse.next({ request: { headers: requestHeaders } });

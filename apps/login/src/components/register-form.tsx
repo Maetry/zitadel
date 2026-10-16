@@ -1,6 +1,7 @@
 "use client";
 
 import { handleServerActionResponse } from "@/lib/client-utils";
+import { joinName, splitName } from "@/lib/maetry-name";
 import { registerUser } from "@/lib/server/register";
 import { LegalAndSupportSettings } from "@zitadel/proto/zitadel/settings/v2/legal_settings_pb";
 import { LoginSettings, PasskeysType } from "@zitadel/proto/zitadel/settings/v2/login_settings_pb";
@@ -20,8 +21,7 @@ import { Translated } from "./translated";
 
 type Inputs =
   | {
-      firstname: string;
-      lastname: string;
+      name: string;
       email: string;
     }
   | FieldValues;
@@ -51,8 +51,8 @@ export function RegisterForm({
     mode: "onChange",
     defaultValues: {
       email: email ?? "",
-      firstname: firstname ?? "",
-      lastname: lastname ?? "",
+      // MAETRY: one free-form name instead of first and last name (see lib/maetry-name.ts).
+      name: joinName(firstname, lastname),
     },
   });
 
@@ -70,8 +70,7 @@ export function RegisterForm({
     try {
       const response = await registerUser({
         email: values.email,
-        firstName: values.firstname,
-        lastName: values.lastname,
+        ...splitName(values.name),
         organization: organization,
         requestId: requestId,
       });
@@ -87,7 +86,9 @@ export function RegisterForm({
   }
 
   async function submitAndContinue(value: Inputs, withPassword: boolean = false) {
-    const registerParams: any = value;
+    // MAETRY: /register/password still takes the name as firstname and lastname.
+    const { firstName, lastName } = splitName(value.name);
+    const registerParams: any = { email: value.email, firstname: firstName, lastname: lastName };
 
     if (organization) {
       registerParams.organization = organization;
@@ -118,27 +119,16 @@ export function RegisterForm({
       {samlData && <AutoSubmitForm url={samlData.url} fields={samlData.fields} />}
       <form className="w-full">
         <div className="mb-4 grid grid-cols-2 gap-4">
-          <div className="">
+          <div className="col-span-2">
             <TextInput
-              type="firstname"
-              autoComplete="firstname"
+              type="text"
+              autoComplete="name"
               autoFocus
               required
-              {...register("firstname", { required: t("required.firstname") })}
-              label={t("labels.firstname")}
-              error={errors.firstname?.message as string}
-              data-testid="firstname-text-input"
-            />
-          </div>
-          <div className="">
-            <TextInput
-              type="lastname"
-              autoComplete="lastname"
-              required
-              {...register("lastname", { required: t("required.lastname") })}
-              label={t("labels.lastname")}
-              error={errors.lastname?.message as string}
-              data-testid="lastname-text-input"
+              {...register("name", { required: t("required.name") })}
+              label={t("labels.name")}
+              error={errors.name?.message as string}
+              data-testid="name-text-input"
             />
           </div>
           <div className="col-span-2">

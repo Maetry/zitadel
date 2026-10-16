@@ -40,6 +40,10 @@ Every change is marked with a `MAETRY:` comment in the source.
 | `apps/login/.env.production` | new: `NEXT_PUBLIC_THEME_*` (roundness, layout, spacing, appearance, background) | Maetry theme; `next build` reads it, so a change needs a rebuild and redeploy. Colors, logo and font come from Branding in the Zitadel console, not from here |
 | `apps/login/src/components/system-theme.tsx`, `src/app/(login)/layout.tsx` | new `SystemTheme` instead of `ThemeSwitch`; `LanguageSwitcher` (and the allowed-languages lookup it needed) removed | no light/dark or language switch: the login follows the system light/dark setting (a stored choice is reset, a mode forced in Branding still wins); the apps pass the language as `ui_locales` |
 | `apps/login/wrangler.jsonc` | `ZITADEL_UI_LOCALES_OVERRIDE_COOKIE=true` | the apps pass the language as `ui_locales`, which wins over a language picked earlier |
+| `apps/login/src/components/button.tsx`, `src/app/(login)/layout.tsx` | solid `#2B60DE` primary actions, including glass appearance; white / black page background | readable enabled buttons without hover; black background in dark mode |
+| `apps/login/src/components/card.tsx` | glass card: solid `#f2f2f7` / `#2c2c2e` surface instead of the translucent fill | the card stands out from the white / black page |
+| `apps/login/src/components/idps/sign-in-with-google.tsx` | `h-full w-full` on the logo SVG | WebKit (iOS Safari, ASWebAuthenticationSession) collapses a viewBox-only SVG in a flex box, so the Google logo was invisible |
+| `apps/login/src/lib/maetry-name.ts`, `register-form.tsx`, `register-form-idp-incomplete.tsx`, `lib/zitadel.ts` (`addHumanUser`), `locales/{en,ru}.json` (`register.labels.name`, `register.required.name`) | one free-form Name field instead of first and last name; split into given/family name (one word fills both), kept as typed in `displayName` and `nickName` | users write whatever they want to be called; ZITADEL still requires both name parts; the Maetry API addresses users by `nickname` |
 
 ## Building for Cloudflare Workers
 

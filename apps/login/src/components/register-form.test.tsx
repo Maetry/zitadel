@@ -25,8 +25,8 @@ const defaultLegal = create(LegalAndSupportSettingsSchema, {});
 describe("RegisterForm", () => {
   afterEach(cleanup);
 
-  test("should autofocus the firstname input on mount", () => {
+  test("should autofocus the name input on mount", () => {
     const { getByTestId } = render(<RegisterForm legal={defaultLegal} organization="org-1" idpCount={0} />);
-    expect(getByTestId("firstname-text-input")).toHaveFocus();
+    expect(getByTestId("name-text-input")).toHaveFocus();
   });
 });
