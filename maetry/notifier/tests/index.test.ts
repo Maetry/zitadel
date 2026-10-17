@@ -38,6 +38,28 @@ beforeEach(() => {
 afterEach(() => { vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
 describe('zitadel-notifier', () => {
+  it.each(['+12025550100', '+12025550150', '+12025550199', '+1 (202) 555-0100', '12025550199'])('skips fictional SMS recipient %s', async recipient => {
+    const logged = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const body = smsBody.replace('+15551234567', recipient);
+    const response = await call('/zitadel/sms', body, 'sms-new');
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ skipped: true, reason: 'fictional_number' });
+    expect(telnyx).not.toHaveBeenCalled();
+    expect(JSON.parse(logged.mock.calls[0][0] as string)).toMatchObject({ event: 'sms_skipped', reason: 'fictional_number' });
+    expect(JSON.stringify(logged.mock.calls)).not.toContain('123456');
+  });
+
+  it.each(['+12025550099', '+12025550200', '+12035550100', '+120255501000'])('does not suppress numbers outside the range: %s', async recipient => {
+    telnyx.mockResolvedValue(Response.json({ data: { id: 'msg-1' } }));
+    expect((await call('/zitadel/sms', smsBody.replace('+15551234567', recipient), 'sms-new')).status).toBe(200);
+    expect(telnyx).toHaveBeenCalledOnce();
+  });
+
+  it('requires a valid signature even for fictional numbers', async () => {
+    expect((await call('/zitadel/sms', smsBody.replace('+15551234567', '+12025550100'), null)).status).toBe(401);
+    expect(telnyx).not.toHaveBeenCalled();
+  });
+
   it('sends an SMS through Telnyx', async () => {
     telnyx.mockResolvedValue(Response.json({ data: { id: 'msg-1' } }));
     const response = await call('/zitadel/sms', smsBody, 'sms-old');

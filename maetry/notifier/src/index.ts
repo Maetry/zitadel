@@ -36,6 +36,15 @@ export default {
       log('warn', { event: 'payload_rejected', channel });
       return json(400, { error: 'invalid_payload' });
     }
+    // Acknowledge fictional test numbers without contacting the SMS provider.
+    if (channel === 'sms' && /^\+?120255501\d{2}$/.test(notification.recipient.replace(/[\s().-]/g, ''))) {
+      log('info', {
+        event: 'sms_skipped', reason: 'fictional_number', channel,
+        eventType: notification.eventType, providerId: notification.providerId,
+        recipient: maskRecipient(notification.recipient),
+      });
+      return json(200, { skipped: true, reason: 'fictional_number' });
+    }
     if (!env.TELNYX_API_KEY) {
       log('error', { event: 'telnyx_not_configured', channel });
       return json(500, { error: 'not_configured' });

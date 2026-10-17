@@ -113,11 +113,12 @@ Setting up ZITADEL (Default settings). ZITADEL has no test call for HTTP provide
 so the provider is checked live right after activation:
 
 1. Deploy the Worker and set `TELNYX_API_KEY`.
-2. Add an HTTP email provider (SMTP Provider → HTTP) with endpoint
-   `https://notify.maetry.com/zitadel/email` and an HTTP SMS provider with
-   `https://notify.maetry.com/zitadel/sms`. Each returns its signing key once; put it
-   into `ZITADEL_EMAIL_SIGNING_KEYS` / `ZITADEL_SMS_SIGNING_KEYS`.
-3. Activate both and immediately trigger an email verification and a phone code on a
+2. The console has no form for HTTP providers (v4.19), only the Admin API. With a
+   token that has `iam.write` (IAM_OWNER), run `scripts/add-zitadel-providers.sh`: it
+   creates both providers inactive, pointing at `/zitadel/email` and `/zitadel/sms`,
+   and pipes each returned signing key into `ZITADEL_EMAIL_SIGNING_KEYS` /
+   `ZITADEL_SMS_SIGNING_KEYS` without printing it.
+3. Activate both (`scripts/activate-zitadel-provider.sh email|sms <id>`) and immediately trigger an email verification and a phone code on a
    test user. Check `npx wrangler tail zitadel-notifier` and the Telnyx logs.
 4. Rollback: deactivate the provider in ZITADEL.
 
