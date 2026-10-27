@@ -22,10 +22,9 @@ function getDefaultCardPadding(): string {
 // Helper function to get default background from centralized theme system
 function getDefaultCardBackground(): string {
   const themeConfig = getThemeConfig();
-  // MAETRY: on the white / black page the glass card is an iOS grouped surface so it
-  // stands out from the background.
+  // MAETRY: Apple sign-in card: white on the gray page, #1c1c1e on the black one.
   if (themeConfig.appearance === "glass") {
-    return "bg-[#f2f2f7] dark:bg-[#2c2c2e]";
+    return "bg-white dark:bg-[#1c1c1e]";
   }
   const appearance = APPEARANCE_STYLES[themeConfig.appearance];
 
@@ -36,9 +35,10 @@ function getDefaultCardBackground(): string {
 // Helper function to get default card styling from centralized theme system
 function getDefaultCardStyling(): string {
   const themeConfig = getThemeConfig();
-  // MAETRY: glass styling without its translucent fill, which would override the surface above.
+  // MAETRY: Apple's soft two-layer shadow instead of the translucent glass fill; a shadow is
+  // invisible on black, so dark mode gets a faint border instead.
   if (themeConfig.appearance === "glass") {
-    return "border border-black/5 dark:border-white/10 shadow-xl";
+    return "border border-transparent dark:border-white/10 shadow-[0_2px_4px_rgba(0,0,0,0.12),0_2px_12px_rgba(0,0,0,0.08)] dark:shadow-none";
   }
   const appearance = APPEARANCE_STYLES[themeConfig.appearance];
   return appearance?.card || "shadow-sm border-0"; // Fallback to material design

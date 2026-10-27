@@ -38,8 +38,8 @@ export const getButtonClasses = (
       "box-border leading-36px text-14px inline-flex items-center focus:outline-none transition-colors transition-shadow duration-300": true,
       "disabled:border-none disabled:bg-gray-300 disabled:text-gray-600 disabled:shadow-none disabled:cursor-not-allowed disabled:dark:bg-gray-700 disabled:dark:text-gray-900":
         variant === ButtonVariants.Primary,
-      // MAETRY: primary actions stay brand blue without requiring hover.
-      "bg-[#2B60DE] dark:bg-[#2B60DE] text-white dark:text-white":
+      // MAETRY: primary actions stay Apple blue without requiring hover.
+      "bg-[#0071e3] dark:bg-[#0071e3] enabled:hover:bg-[#0077ed] text-white dark:text-white":
         variant === ButtonVariants.Primary && color !== ButtonColors.Warn,
       "bg-warn-light-500 dark:bg-warn-dark-500 hover:bg-warn-light-400 hover:dark:bg-warn-dark-400 text-white dark:text-white":
         variant === ButtonVariants.Primary && color === ButtonColors.Warn,
@@ -62,9 +62,9 @@ function getDefaultButtonRoundness(): string {
 // Helper function to get default button appearance from centralized theme system
 function getDefaultButtonAppearance(variant: ButtonVariants): string {
   const themeConfig = getThemeConfig();
-  // MAETRY: glass backgrounds must not replace a primary button's solid fill.
+  // MAETRY: glass backgrounds must not replace a primary button's solid fill; flat like Apple's.
   if (themeConfig.appearance === "glass" && variant === ButtonVariants.Primary) {
-    return "backdrop-blur-sm border border-white/30 dark:border-white/20 shadow-lg";
+    return "border border-transparent shadow-none";
   }
   const appearance = APPEARANCE_STYLES[themeConfig.appearance];
   return appearance?.button || "border border-button-light-border dark:border-button-dark-border"; // Fallback to flat design

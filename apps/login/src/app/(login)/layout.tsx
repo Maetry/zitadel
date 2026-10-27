@@ -13,8 +13,8 @@ import { getTranslations } from "next-intl/server";
 import { Lato } from "next/font/google";
 import React, { Suspense } from "react";
 
-// MAETRY: white in light mode, pure black in dark mode.
-const loginBackground = "bg-white dark:bg-black relative flex min-h-screen flex-col justify-center";
+// MAETRY: Apple sign-in page: #f5f5f7 gray in light mode, pure black in dark mode.
+const loginBackground = "bg-[#f5f5f7] dark:bg-black relative flex min-h-screen flex-col justify-center";
 
 const lato = Lato({
   weight: ["400", "700", "900"],
